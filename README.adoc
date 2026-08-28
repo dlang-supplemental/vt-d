@@ -1,0 +1,150 @@
+ifndef::env-github[:icons: font]
+:toc: preamble
+:toclevels: 2
+:sectanchors:
+
+ifdef::env-github[]
+++++
+<a id="readme-top"></a>
+<div align="center">
+<a href="https://code.dlang.org/packages/vt-d"><img src="https://img.shields.io/dub/v/vt-d.svg?style=for-the-badge" alt="Dub version"></a>
+<a href="https://github.com/dlang-supplemental/vt-d/graphs/contributors"><img src="https://img.shields.io/github/contributors/dlang-supplemental/vt-d.svg?style=for-the-badge" alt="Contributors"></a>
+<a href="https://github.com/dlang-supplemental/vt-d/network/members"><img src="https://img.shields.io/github/forks/dlang-supplemental/vt-d.svg?style=for-the-badge" alt="Forks"></a>
+<a href="https://github.com/dlang-supplemental/vt-d/stargazers"><img src="https://img.shields.io/github/stars/dlang-supplemental/vt-d.svg?style=for-the-badge" alt="Stars"></a>
+<a href="https://github.com/dlang-supplemental/vt-d/issues"><img src="https://img.shields.io/github/issues/dlang-supplemental/vt-d.svg?style=for-the-badge" alt="Issues"></a>
+<a href="https://github.com/dlang-supplemental/vt-d/blob/main/LICENSE"><img src="https://img.shields.io/github/license/dlang-supplemental/vt-d.svg?style=for-the-badge" alt="License"></a>
+<br />
+<h3 align="center">vt-d</h3>
+<p align="center">
+VT/ANSI escape parser and character-cell screen model for the D programming language.<br />
+<a href="https://github.com/dlang-supplemental/vt-d/issues">Report Bug</a>
+&middot;
+<a href="https://github.com/dlang-supplemental/vt-d/issues">Request Feature</a>
+</p>
+</div>
+++++
+endif::[]
+
+ifndef::env-github[]
+image:https://img.shields.io/dub/v/vt-d.svg?style=for-the-badge[Dub version,link=https://code.dlang.org/packages/vt-d]
+image:https://img.shields.io/github/contributors/dlang-supplemental/vt-d.svg?style=for-the-badge[Contributors,link=https://github.com/dlang-supplemental/vt-d/graphs/contributors]
+image:https://img.shields.io/github/forks/dlang-supplemental/vt-d.svg?style=for-the-badge[Forks,link=https://github.com/dlang-supplemental/vt-d/network/members]
+image:https://img.shields.io/github/stars/dlang-supplemental/vt-d.svg?style=for-the-badge[Stars,link=https://github.com/dlang-supplemental/vt-d/stargazers]
+image:https://img.shields.io/github/issues/dlang-supplemental/vt-d.svg?style=for-the-badge[Issues,link=https://github.com/dlang-supplemental/vt-d/issues]
+image:https://img.shields.io/github/license/dlang-supplemental/vt-d.svg?style=for-the-badge[License,link=https://github.com/dlang-supplemental/vt-d/blob/main/LICENSE]
+
+= vt-d
+
+VT/ANSI escape parser and character-cell screen model for the D programming language.
+
+link:https://github.com/dlang-supplemental/vt-d/issues[Report Bug] ·
+link:https://github.com/dlang-supplemental/vt-d/issues[Request Feature]
+endif::[]
+
+Package name on DUB: `vt-d`.
+
+== About The Project
+
+`vt-d` turns a byte stream of VT/ANSI escapes into a **character-cell grid** (`Screen` of `Cell`s: glyph, fg/bg, attributes). It is the terminal *emulator screen model* only — no PTY, no window, no GPU.
+
+Use it with link:https://github.com/dlang-supplemental/pty-d[`pty-d`] (Windows ConPTY + POSIX `posix_openpt`) when you need a host. Rendering (for example dew + vello-d) stays in the application.
+
+=== Related packages
+
+[cols="1,2", options="header"]
+|===
+| Package | Role
+
+| **vt-d** (this)
+| Parse VT/ANSI → cell surface
+
+| link:https://github.com/dlang-supplemental/pty-d[`pty-d`]
+| PTY / ConPTY I/O (sibling; not duplicated here)
+
+| link:https://code.dlang.org/packages/arsd-official[`arsd-official:terminalemulator`]
+| Full ARSD terminal emulator (drawing hooks, large surface) — different scope
+
+| link:https://code.dlang.org/packages/ansi[`ansi`] / link:https://code.dlang.org/packages/jansi[`jansi`]
+| Emit/format ANSI codes — not a screen model
+
+| link:https://code.dlang.org/packages/dcell[`dcell`]
+| TUI cell helpers — not a VT parser
+|===
+
+Still needed for a greenfield D terminal host: wire **ConPTY (`pty-d`) + vt-d + dew** (see OpenShellOrg shell-architecture inventory).
+
+== Features
+
+* Byte stream → VT/ANSI parse (CSI, OSC title subset, SGR colors, cursor, clear, scroll)
+* `Screen` / cell grid (char, fg/bg, attrs) with resize and optional scrollback
+* UTF-8 printable text
+* Zero dependencies beyond Phobos
+* Unittests with golden escape sequences
+
+== Usage
+
+[source,d]
+----
+import vt;
+
+void main()
+{
+    auto em = new Emulator(80, 24);
+    em.feed("\033[31;1mHello\033[0m\n");
+    assert(em.screen.at(0, 0).ch == 'H');
+    assert(em.screen.at(0, 0).fg == Color.ansi(1));
+    import std.stdio : writeln;
+    writeln(em.screen.dumpText());
+}
+----
+
+Demo binary:
+
+[source,shell]
+----
+dub run -c example-dump -- --demo
+----
+
+== Installation
+
+Add to `dub.json`:
+
+[source,json]
+----
+"dependencies": {
+    "vt-d": "~>0.1.0"
+}
+----
+
+Or `dub.sdl`:
+
+[source,sdl]
+----
+dependency "vt-d" version="~>0.1.0"
+----
+
+== VT subset (v0.1)
+
+* **C0:** BS, HT, LF/VT/FF, CR
+* **ESC:** RIS (`c`), DECSC/DECRC (`7`/`8`), IND/NEL/RI (`D`/`E`/`M`)
+* **CSI:** CUP/HVP, cursor moves, ED/EL, IL/DL, ICH/DCH/ECH, SU/SD, DECSTBM, SGR (attrs + 16/256/truecolor), IRM, DECSET/DECRST `?25` / `?6` / `?7`
+* **OSC:** `0` / `2` titles (BEL or ST)
+* **Not yet:** mouse, bracketed paste, most private modes, alternate screen buffer, sixels, full charset G0/G1
+
+== Built With
+
+* Runtime: D (LDC / DMD), Phobos
+* Packaging: DUB (`dub.sdl`)
+
+== Changelog
+
+See link:CHANGELOG.adoc[CHANGELOG].
+
+== License
+
+MIT — see link:LICENSE[LICENSE].
+
+== Contact
+
+* GitHub: link:https://github.com/dlang-supplemental/vt-d[dlang-supplemental/vt-d]
+* Org: link:https://github.com/dlang-supplemental[dlang-supplemental]

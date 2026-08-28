@@ -1,0 +1,6 @@
+= Changelog
+
+== 2026-08-28 — v0.1.0
+
+* Initial VT/ANSI parser and character-cell `Screen` (CSI cursor/erase/scroll/SGR, OSC title, UTF-8, scrollback)
+* link:changelog-details/2026-08-28%20-%20initial%20vt%20screen.adoc[Details]

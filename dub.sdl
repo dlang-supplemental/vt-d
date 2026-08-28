@@ -1,0 +1,29 @@
+name "vt-d"
+description "VT/ANSI escape parser and character-cell screen model for D (no PTY)"
+authors "amdphreak"
+copyright "Copyright © 2026, dlang-supplemental contributors"
+license "MIT"
+version "0.1.0"
+# Keep in sync with VERSION / git tag vX.Y.Z.
+
+targetType "library"
+targetName "vt_d"
+
+importPaths "source"
+sourcePaths "source"
+stringImportPaths "."
+
+configuration "library" {
+	targetType "library"
+}
+
+configuration "unittest" {
+	targetType "library"
+}
+
+configuration "example-dump" {
+	targetType "executable"
+	targetName "vt-dump-screen"
+	sourceFiles "examples/dump_screen.d"
+	mainSourceFile "examples/dump_screen.d"
+}

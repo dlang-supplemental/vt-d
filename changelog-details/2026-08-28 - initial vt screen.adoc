@@ -1,0 +1,21 @@
+= Initial VT parser + cell surface
+
+== Summary
+
+`vt-d` ships a pure-logic terminal screen model for D: feed a byte stream of VT/ANSI escapes, get a character-cell grid. No PTY, windowing, or GPU.
+
+== Why
+
+Open Shell / dew hosts need a reusable parse → cell grid layer separate from ConPTY (`pty-d`) and from full GUI terminal emulators (for example ARSD `terminalemulator`).
+
+== Coverage (v0.1)
+
+* C0: BS, HT, LF/VT/FF, CR
+* ESC: RIS, DECSC/DECRC, IND/NEL/RI, CSI/OSC entry
+* CSI: CUP/HVP, CUU/CUD/CUF/CUB, CNL/CPL, CHA, VPA, ED/EL, IL/DL, ICH/DCH/ECH, SU/SD, DECSTBM, SGR (16/256/truecolor + attrs), SM/RM IRM, DECSET/DECRST `?25`/`?6`/`?7`
+* OSC: `0` / `2` window title (BEL or ST)
+* UTF-8 printable text; optional scrollback on scroll-up
+
+== Non-goals
+
+PTY/ConPTY, windowing, Vello/dew rendering, full xterm private modes, mouse, bracketed paste.
