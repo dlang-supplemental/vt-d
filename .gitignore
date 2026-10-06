@@ -31,3 +31,5 @@ dub.selections.json
 *.o
 *.a
 *.log
+!/.editorconfig
+!/.gitattributes
